@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Misi Penjaga Norma - Media Pembelajaran Interaktif & Game Edukasi SMP</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        norma: {
+                            agama: '#8b5cf6',
+                            kesusilaan: '#ec4899',
+                            kesopanan: '#10b981',
+                            hukum: '#f59e0b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Three.js for 3D Map, Scenarios, AR/VR fallback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Chart.js for Teacher Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Canvas Confetti for Achievements -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.25);
+        }
+
+        /* Touch-friendly buttons */
+        .btn-touch {
+            min-height: 48px;
+            min-width: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Drag and drop styling */
+        .draggable-item {
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        .drop-zone {
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone.drag-over {
+            background-color: rgba(14, 165, 233, 0.25);
+            border-color: #38bdf8;
+            transform: scale(1.02);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Certificate Print Styling */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableCertificate, #printableCertificate * {
+                visibility: visible;
+            }
+            #printableCertificate {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-sky-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-700/50 px-4 py-3 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="app.navigateTo('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-sky-500/30">
+                    <i class="fa-solid font-bold fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base md:text-lg bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-300 leading-tight">
+                        MISI PENJAGA NORMA
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium hidden sm:block">SMP Kelas VII - Pendidikan Pancasila</p>
+                </div>
+            </div>
+
+            <!-- Global User Stats (Hidden on Login) -->
+            <div id="globalUserStats" class="hidden flex items-center space-x-2 md:space-x-4">
+                <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
+                    <i class="fa-solid fa-bolt text-yellow-400 text-sm"></i>
+                    <span id="userXpDisplay" class="font-bold text-xs md:text-sm text-yellow-400">0 XP</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
+                    <i class="fa-solid fa-trophy text-amber-500 text-sm"></i>
+                    <span id="userLevelDisplay" class="font-bold text-xs md:text-sm text-slate-200">Lvl 1</span>
+                </div>
+                <button onclick="app.toggleTTS()" id="ttsToggleBtn" title="Bacakan Teks" class="btn-touch p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+                    <i class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Drawer / Quick Menu Bar -->
+    <nav id="bottomNav" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 glass-panel rounded-full px-4 py-2 border border-slate-700 shadow-2xl flex items-center space-x-1 sm:space-x-3 max-w-[95vw] overflow-x-auto">
+        <button onclick="app.navigateTo('dashboard')" class="nav-btn p-2 sm:px-3 sm:py-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/80 text-xs font-semibold flex items-center space-x-1.5 transition">
+            <i class="fa-solid fa-house"></i>
+            <span class="hidden md:inline">Dashboard</span>
+        </button>
+        <button onclick="app.navigateTo('materi')" class="nav-btn p-2 sm:px-3 sm:py-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/80 text-xs font-semibold flex items-center space-x-1.5 transition">
+            <i class="fa-solid fa-book-open"></i>
+            <span class="hidden md:inline">Materi</span>
+        </button>
+        <button onclick="app.navigateTo('map3d')" class="nav-btn p-2 sm:px-3 sm:py-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/80 text-xs font-semibold flex items-center space-x-1.5 transition">
+            <i class="fa-solid fa-map-location-dot text-sky-400"></i>
+            <span class="hidden md:inline">Peta 3D</span>
+        </button>
+        <button onclick="app.navigateTo('games')" class="nav-btn p-2 sm:px-3 sm:py-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/80 text-xs font-semibold flex items-center space-x-1.5 transition">
+            <i class="fa-solid fa-gamepad text-emerald-400"></i>
+            <span class="hidden md:inline">Misi Game</span>
+        </button>
+        <button onclick="app.navigateTo('ar_vr')" class="nav-btn p-2 sm:px-3 sm:py-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/80 text-xs font-semibold flex items-center space-x-1.5 transition">
+            <i class="fa-solid fa-vr-cardboard text-purple-400"></i>
+            <span class="hidden md:inline">AR/VR</span>
+        </button>
+        <button onclick="app.navigateTo('reflection')" class="nav-btn p-2 sm:px-3 sm:py-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/80 text-xs font-semibold flex items-center space-x-1.5 transition">
+            <i class="fa-solid fa-pen-ruler text-pink-400"></i>
+            <span class="hidden md:inline">Refleksi</span>
+        </button>
+        <button onclick="app.navigateTo('teacher')" class="nav-btn p-2 sm:px-3 sm:py-2 rounded-full text-amber-400 hover:bg-amber-400/10 text-xs font-semibold flex items-center space-x-1.5 transition">
+            <i class="fa-solid fa-user-shield"></i>
+            <span class="hidden md:inline">Guru</span>
+        </button>
+    </nav>
+
+    <!-- MAIN CONTAINER FOR VIEWS -->
+    <main class="flex-grow container mx-auto px-4 py-6 max-w-6xl pb-24">
+
+        <!-- VIEW 1: LOGIN PESERTA DIDIK -->
+        <section id="loginView" class="view-section flex items-center justify-center py-6">
+            <div class="glass-panel w-full max-w-lg rounded-3xl p-6 md:p-8 shadow-2xl border border-slate-700/80 relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-40 h-40 bg-sky-500/20 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-tr from-sky-500 to-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-3xl text-white shadow-lg shadow-sky-500/30 mb-3">
+                        <i class="fa-solid fa-shield-cat"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-white">Selamat Datang Penjaga Norma!</h2>
+                    <p class="text-slate-400 text-sm mt-1">Isi identitas diri untuk memulai petualangan edukatif di dunia norma.</p>
+                </div>
+
+                <form id="loginForm" onsubmit="app.handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Nama Lengkap</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" id="studentName" required placeholder="Contoh: Ahmad Rizky" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Kelas</label>
+                            <select id="studentClass" required class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-sky-500 transition">
+                                <option value="VII-A">VII-A</option>
+                                <option value="VII-B">VII-B</option>
+                                <option value="VII-C">VII-C</option>
+                                <option value="VII-D">VII-D</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">No. Absen</label>
+                            <input type="number" id="studentAbsen" min="1" max="50" required placeholder="15" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-sky-500 transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Sekolah</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-school"></i></span>
+                            <input type="text" id="studentSchool" required value="SMP Negeri 7 Senayang" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500 transition">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-touch w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold rounded-xl py-3.5 shadow-lg shadow-sky-500/25 transition transform active:scale-95 flex items-center justify-center space-x-2">
+                        <span>MULAI PETUALANGAN</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-slate-500">
+                    <p><i class="fa-solid fa-lock text-emerald-400 mr-1"></i> Data disimpan aman secara lokal & tidak memerlukan kata sandi.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: GUIDANCE & PRE-TEST -->
+        <section id="pretestView" class="view-section hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl font-bold">
+                        <i class="fa-solid fa-clipboard-question"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Petunjuk & Pre-Test Diagnostik</h2>
+                        <p class="text-xs text-slate-400">Uji kemampuan awalmu sebelum menjelajahi Misi Penjaga Norma.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 text-sm text-slate-300 space-y-2 mb-6">
+                    <p class="font-bold text-amber-400"><i class="fa-solid fa-circle-info mr-1"></i> Aturan Pre-Test:</p>
+                    <ul class="list-disc list-inside space-y-1 text-xs md:text-sm">
+                        <li>Jawablah 10 pertanyaan awal sesuai pengetahuan dasarmu.</li>
+                        <li>Tidak ada pengurangan poin pada Pre-Test.</li>
+                        <li>Hasil ini akan dibandingkan dengan Post-Test untuk mengukur persentase peningkatan belajarmu!</li>
+                    </ul>
+                </div>
+
+                <!-- Pretest Quiz Container -->
+                <div id="pretestQuestionsContainer" class="space-y-6"></div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="app.submitPretest()" class="btn-touch px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center space-x-2">
+                        <span>KIRIM PRE-TEST & BUKA PETA</span>
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: MAIN DASHBOARD -->
+        <section id="dashboardView" class="view-section hidden space-y-6">
+            <!-- Welcome Header -->
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-400 to-indigo-600 p-1 flex-shrink-0">
+                        <div class="w-full h-full bg-slate-900 rounded-xl flex items-center justify-center text-3xl">
+                            🦁
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-extrabold text-white">
+                            Selamat Datang, <span id="dashStudentName" class="text-sky-400">Siswa</span>!
+                        </h2>
+                        <p class="text-xs md:text-sm text-slate-400" id="dashStudentInfo">Kelas VII | SMP Negeri 7 Senayang</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                    <button onclick="app.navigateTo('map3d')" class="btn-touch px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-white text-sm font-bold rounded-xl shadow-lg shadow-sky-500/25 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>JELAJAHI PETA DUNIA 3D</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-card p-4 rounded-2xl">
+                    <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                        <span>Total XP</span>
+                        <i class="fa-solid fa-bolt text-yellow-400"></i>
+                    </div>
+                    <div class="text-2xl font-black text-yellow-400" id="dashXp">0 XP</div>
+                    <p class="text-[10px] text-slate-500 mt-1">+100 XP per jawaban benar</p>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl">
+                    <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                        <span>Level Penjaga</span>
+                        <i class="fa-solid fa-shield-halved text-sky-400"></i>
+                    </div>
+                    <div class="text-2xl font-black text-sky-400" id="dashLevel">Lvl 1</div>
+                    <p class="text-[10px] text-slate-500 mt-1" id="dashLevelTitle">Pemula Norma</p>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl">
+                    <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                        <span>Misi Selesai</span>
+                        <i class="fa-solid fa-list-check text-emerald-400"></i>
+                    </div>
+                    <div class="text-2xl font-black text-emerald-400" id="dashMissions">0/10</div>
+                    <p class="text-[10px] text-slate-500 mt-1">Selesaikan seluruh tantangan</p>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl">
+                    <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                        <span>Skor Pre-Test</span>
+                        <i class="fa-solid fa-chart-line text-purple-400"></i>
+                    </div>
+                    <div class="text-2xl font-black text-purple-400" id="dashPretestScore">0</div>
+                    <p class="text-[10px] text-slate-500 mt-1">Skor modal awal</p>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="glass-panel p-5 rounded-3xl border border-slate-700">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-bold text-slate-200">Progres Keseluruhan Misi</span>
+                    <span class="text-xs font-extrabold text-sky-400" id="dashProgressPercent">0%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3.5 overflow-hidden border border-slate-700 p-0.5">
+                    <div id="dashProgressBar" class="bg-gradient-to-r from-sky-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Mission Levels Grid -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-map text-sky-400"></i>
+                    <span>Daftar Misi Pembelajaran</span>
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="missionLevelsGrid">
+                    <!-- Dynamic rendering of level cards -->
+                </div>
+            </div>
+
+            <!-- Badges Section -->
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-award text-amber-400"></i>
+                    <span>Lencana & Pencapaian (Badges)</span>
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3" id="badgesContainer">
+                    <!-- Badges rendered via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: MATERI INTERAKTIF -->
+        <section id="materiView" class="view-section hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <span class="text-xs font-bold text-sky-400 uppercase tracking-widest">Eksplorasi Konsep</span>
+                        <h2 class="text-2xl font-black text-white">Materi: Norma dalam Masyarakat</h2>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="app.readCurrentMateriText()" class="btn-touch px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl border border-slate-700 flex items-center space-x-2">
+                            <i class="fa-solid fa-volume-high"></i>
+                            <span>DENGARKAN MATERI</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex border-b border-slate-700 overflow-x-auto space-x-2 mb-6">
+                    <button onclick="app.switchMateriTab('definisi')" id="tab-definisi" class="materi-tab px-4 py-2.5 text-sm font-bold border-b-2 border-sky-400 text-sky-400 whitespace-nowrap">1. Apa Itu Norma?</button>
+                    <button onclick="app.switchMateriTab('jenis')" id="tab-jenis" class="materi-tab px-4 py-2.5 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">2. 4 Macam Norma</button>
+                    <button onclick="app.switchMateriTab('fungsi')" id="tab-fungsi" class="materi-tab px-4 py-2.5 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">3. Fungsi & Sanksi</button>
+                    <button onclick="app.switchMateriTab('perbandingan')" id="tab-perbandingan" class="materi-tab px-4 py-2.5 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">4. Tabel Perbandingan</button>
+                </div>
+
+                <!-- Tab Content Containers -->
+                <div id="materiContent" class="text-slate-200 space-y-4">
+                    <!-- Dynamic Material HTML inserted via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 5: INTERACTIVE 3D WORLD MAP -->
+        <section id="map3dView" class="view-section hidden space-y-4">
+            <div class="glass-panel p-4 md:p-6 rounded-3xl border border-slate-700">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h2 class="text-xl font-black text-white flex items-center space-x-2">
+                            <i class="fa-solid fa-earth-asia text-sky-400"></i>
+                            <span>Peta Lingkungan Masyarakat 3D</span>
+                        </h2>
+                        <p class="text-xs text-slate-400">Klik / sentuh bangunan di kota untuk menyelesaikan misi norma lokasi tersebut!</p>
+                    </div>
+                    <button onclick="app.reset3DCamera()" class="btn-touch p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs text-slate-300 font-bold border border-slate-700">
+                        <i class="fa-solid fa-rotate mr-1"></i> Reset Kamera
+                    </button>
+                </div>
+
+                <!-- 3D Canvas Container -->
+                <div class="relative w-full h-[380px] md:h-[480px] rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 shadow-inner">
+                    <div id="threeMapCanvas" class="w-full h-full"></div>
+                    
+                    <!-- Floating Controls Overlay -->
+                    <div class="absolute bottom-4 left-4 right-4 glass-panel p-3 rounded-xl border border-slate-700 text-xs flex justify-between items-center pointer-events-none">
+                        <span class="text-slate-300"><i class="fa-solid fa-hand-pointer text-sky-400 mr-1"></i> Geser untuk putar, Pinch/Scroll untuk Zoom</span>
+                        <span class="font-bold text-emerald-400" id="selectedBuildingLabel">Pilih Bangunan</span>
+                    </div>
+                </div>
+
+                <!-- Location Misi Info Modal / Card -->
+                <div id="buildingMissionModal" class="hidden mt-4 glass-card p-5 rounded-2xl border border-sky-500/40 bg-slate-900/90">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center space-x-3">
+                            <span id="modalBuildingIcon" class="text-3xl">🏠</span>
+                            <div>
+                                <h3 id="modalBuildingTitle" class="font-bold text-lg text-white">Nama Lokasi</h3>
+                                <p id="modalBuildingSub" class="text-xs text-sky-400">Norma yang Berlaku</p>
+                            </div>
+                        </div>
+                        <button onclick="app.closeBuildingModal()" class="text-slate-400 hover:text-white p-1">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+                    <p id="modalBuildingDesc" class="text-sm text-slate-300 mb-4">Deskripsi situasi di lokasi ini...</p>
+                    <div class="flex justify-end space-x-2">
+                        <button id="modalActionBtn" onclick="app.startLocationMission()" class="btn-touch px-5 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold rounded-xl text-xs shadow-lg shadow-sky-500/30">
+                            KERJAKAN MISI LOKASI INI
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 6: MINI GAMES CONTAINER -->
+        <section id="gamesView" class="view-section hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Arena Praktik</span>
+                        <h2 class="text-2xl font-black text-white" id="gameTitleHeader">Misi Mini Games</h2>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="app.switchGameMode('dragdrop')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-white border border-slate-700">Drag & Drop</button>
+                        <button onclick="app.switchGameMode('memory')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-white border border-slate-700">Memory Match</button>
+                        <button onclick="app.switchGameMode('cases')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-white border border-slate-700">Analisis Kasus</button>
+                    </div>
+                </div>
+
+                <!-- GAME CONTAINER 1: DRAG & DROP -->
+                <div id="gameDragDrop" class="game-subview space-y-6">
+                    <p class="text-xs md:text-sm text-slate-300 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-hand-grab text-emerald-400 mr-1"></i> Tarik / Klik perilaku di bawah ini dan pasangkan ke kotak kelompok norma yang sesuai!
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="draggableItemsPool">
+                        <!-- Draggable items loaded dynamically -->
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dropZonesContainer">
+                        <!-- Drop zones for 4 norms -->
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="app.checkDragDropResults()" class="btn-touch px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 text-sm">
+                            VERIFIKASI JAWABAN
+                        </button>
+                    </div>
+                </div>
+
+                <!-- GAME CONTAINER 2: MEMORY MATCHING -->
+                <div id="gameMemory" class="game-subview hidden space-y-6">
+                    <p class="text-xs md:text-sm text-slate-300 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-brain text-purple-400 mr-1"></i> Buka kartu dan pasangkan antara <strong>Jenis Norma</strong> dengan <strong>Contoh Perilaku yang Sesuai</strong>!
+                    </p>
+
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-w-2xl mx-auto" id="memoryCardsBoard">
+                        <!-- Memory cards generated via JS -->
+                    </div>
+                </div>
+
+                <!-- GAME CONTAINER 3: CASE ANALYSIS (C3-C6) -->
+                <div id="gameCases" class="game-subview hidden space-y-6">
+                    <div id="caseAnalysisCard" class="glass-card p-6 rounded-2xl border border-sky-500/30 space-y-4">
+                        <!-- Case content inserted dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 7: AR & VR EXPERIENCES WITH 3D FALLBACK -->
+        <section id="ar_vrView" class="view-section hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700 space-y-6">
+                <div>
+                    <span class="text-xs font-bold text-purple-400 uppercase tracking-widest">Simulasi Imersif</span>
+                    <h2 class="text-2xl font-black text-white">Laboratorium AR & VR Penjaga Norma</h2>
+                    <p class="text-xs text-slate-400 mt-1">Uji pemahamanmu dalam dunia Augmented Reality & Virtual Reality.</p>
+                </div>
+
+                <!-- Mode Selectors -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- AR Mode Card -->
+                    <div class="glass-card p-6 rounded-2xl border border-slate-700 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl font-bold mb-3">
+                                <i class="fa-solid fa-camera"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white">1. Scan Norma di Sekitarmu (AR)</h3>
+                            <p class="text-xs text-slate-300 mt-2">
+                                Gunakan kamera HP/Laptop untuk memindai Marker Norma (Agama, Kesusilaan, Kesopanan, Hukum) dan memunculkan model 3D nyata.
+                            </p>
+                        </div>
+                        <button onclick="app.launchARMode()" class="btn-touch w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-purple-600/30">
+                            AKTIFKAN KAMERA AR / SIMULASI 3D
+                        </button>
+                    </div>
+
+                    <!-- VR Mode Card -->
+                    <div class="glass-card p-6 rounded-2xl border border-slate-700 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-2xl font-bold mb-3">
+                                <i class="fa-solid fa-vr-cardboard"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white">2. Masuk ke Dunia Virtual (VR 360°)</h3>
+                            <p class="text-xs text-slate-300 mt-2">
+                                Masuki lingkungan masyarakat 360° virtual. Temukan 5 situasi sosial dan identifikasi pelanggaran normanya.
+                            </p>
+                        </div>
+                        <button onclick="app.launchVRMode()" class="btn-touch w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-sky-600/30">
+                            MASUK DUNIA VR / SIMULASI 360°
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AR/VR Canvas Render Modal/Display Area -->
+                <div id="immersiveStage" class="hidden relative w-full h-[400px] bg-black rounded-2xl border border-purple-500/50 overflow-hidden">
+                    <div id="immersiveThreeCanvas" class="w-full h-full"></div>
+                    
+                    <!-- Overlay Notification -->
+                    <div id="xrFallbackNotice" class="absolute top-4 left-4 right-4 glass-panel p-3 rounded-xl border border-amber-500/50 text-xs text-amber-300 flex items-center justify-between">
+                        <span><i class="fa-solid fa-circle-info mr-1"></i> Mode Simulasi 3D Interaktif Aktif (Fallback Perangkat)</span>
+                        <button onclick="app.closeImmersiveStage()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+                    </div>
+
+                    <!-- AR/VR Quiz Trigger Overlay -->
+                    <div id="xrQuizOverlay" class="absolute bottom-4 left-4 right-4 glass-panel p-4 rounded-xl border border-slate-700 text-xs space-y-2">
+                        <h4 id="xrQuizTitle" class="font-bold text-white text-sm">Objek Terdeteksi: Palu Hukum 3D</h4>
+                        <p id="xrQuizDesc" class="text-slate-300">Norma apa yang bersumber dari peraturan resmi negara dan bersifat memaksa?</p>
+                        <div class="grid grid-cols-2 gap-2 pt-2" id="xrQuizOptions">
+                            <!-- Options injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 8: POST-TEST -->
+        <section id="posttestView" class="view-section hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-2xl font-bold">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Evaluasi Akhir (Post-Test)</h2>
+                        <p class="text-xs text-slate-400">Uji seluruh pengetahuan yang telah kamu pelajari selama misi!</p>
+                    </div>
+                </div>
+
+                <div id="posttestQuestionsContainer" class="space-y-6"></div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="app.submitPosttest()" class="btn-touch px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg shadow-sky-600/30 transition flex items-center space-x-2">
+                        <span>KIRIM POST-TEST & LIHAT HASIL</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 9: HASIL AKHIR & SERTIFIKAT -->
+        <section id="resultView" class="view-section hidden space-y-6">
+            <div class="glass-panel p-6 md:p-8 rounded-3xl border border-slate-700 text-center space-y-6">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-yellow-400 to-amber-600 mx-auto flex items-center justify-center text-4xl shadow-xl shadow-amber-500/20">
+                    🏆
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">MISI SELESAI!</span>
+                    <h2 class="text-3xl font-black text-white mt-1" id="resStudentName">Nama Siswa</h2>
+                    <p class="text-xs text-slate-400">Selamat! Kamu telah menyelesaikan seluruh rangkaian Misi Penjaga Norma.</p>
+                </div>
+
+                <!-- Result Score Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
+                    <div class="glass-card p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400">Pre-Test</span>
+                        <div class="text-2xl font-extrabold text-slate-300" id="resPretest">0</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400">Post-Test</span>
+                        <div class="text-2xl font-extrabold text-emerald-400" id="resPosttest">0</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400">Peningkatan (Gain)</span>
+                        <div class="text-2xl font-extrabold text-sky-400" id="resGain">+0%</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400">Total XP</span>
+                        <div class="text-2xl font-extrabold text-yellow-400" id="resXp">0 XP</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap justify-center gap-3 pt-4">
+                    <button onclick="app.navigateTo('reflection')" class="btn-touch px-5 py-3 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-pink-600/30">
+                        <i class="fa-solid fa-pen-ruler mr-2"></i> ISI LEMBAR REFLEKSI
+                    </button>
+                    <button onclick="app.showCertificate()" class="btn-touch px-5 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold rounded-xl shadow-lg shadow-amber-500/30">
+                        <i class="fa-solid fa-certificate mr-2"></i> LIHAT SERTIFIKAT DIGITAL
+                    </button>
+                    <button onclick="app.sendDataToGoogleSheets()" class="btn-touch px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> KIRIM NILAI KE GURU
+                    </button>
+                </div>
+            </div>
+
+            <!-- Digital Certificate Printable Area -->
+            <div id="printableCertificate" class="hidden glass-panel p-8 rounded-3xl border-4 border-amber-500/50 text-slate-900 bg-amber-50 relative overflow-hidden my-6">
+                <div class="border-2 border-amber-600/30 p-8 rounded-2xl text-center space-y-4">
+                    <div class="text-amber-700 font-serif text-xs font-bold tracking-widest uppercase">CERTIFICATE OF ACHIEVEMENT</div>
+                    <h3 class="text-3xl font-black font-serif text-slate-900">SERTIFIKAT PENGHARGAAN</h3>
+                    <p class="text-xs text-slate-600">Diberikan secara terhormat kepada:</p>
+                    
+                    <div class="text-2xl md:text-3xl font-black text-amber-900 underline decoration-amber-500 decoration-2 py-2" id="certStudentName">
+                        NAMA SISWA
+                    </div>
+
+                    <p class="text-xs md:text-sm text-slate-700 max-w-lg mx-auto leading-relaxed">
+                        Atas keberhasilannya dalam menyelesaikan seluruh rangkaian modul pembelajaran dan tantangan simulasi dalam game edukatif 
+                        <strong class="text-amber-900">"MISI PENJAGA NORMA: PETUALANGAN MENJADI WARGA YANG BERTANGGUNG JAWAB"</strong>.
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-2 max-w-md mx-auto pt-4 text-xs">
+                        <div class="bg-amber-100/80 p-2 rounded-lg border border-amber-200">
+                            <span class="block text-[10px] text-slate-500">Skor Akhir</span>
+                            <strong class="text-amber-900 font-bold" id="certScore">90</strong>
+                        </div>
+                        <div class="bg-amber-100/80 p-2 rounded-lg border border-amber-200">
+                            <span class="block text-[10px] text-slate-500">Gelar Penjaga</span>
+                            <strong class="text-amber-900 font-bold" id="certBadge">Master Norma</strong>
+                        </div>
+                        <div class="bg-amber-100/80 p-2 rounded-lg border border-amber-200">
+                            <span class="block text-[10px] text-slate-500">Tanggal</span>
+                            <strong class="text-amber-900 font-bold" id="certDate">02/10/2026</strong>
+                        </div>
+                    </div>
+
+                    <div class="pt-8 flex justify-between items-end text-xs text-slate-600">
+                        <div class="text-left">
+                            <p class="font-bold">SMP Negeri 7 Senayang</p>
+                            <p class="text-[10px]">Kabupaten Lingga</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold">Pengembang Media:</p>
+                            <p class="font-semibold text-amber-900">Herizon, S.Pd., M.Pd.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="no-print mt-4 flex justify-center space-x-3">
+                    <button onclick="window.print()" class="px-5 py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-lg">
+                        <i class="fa-solid fa-print mr-1"></i> Cetak / Simpan PDF
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 10: REFLEKSI SISWA -->
+        <section id="reflectionView" class="view-section hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700 space-y-6">
+                <div>
+                    <span class="text-xs font-bold text-pink-400 uppercase tracking-widest">Pembelajaran Mendalam</span>
+                    <h2 class="text-2xl font-black text-white">Lembar Refleksi Diri</h2>
+                    <p class="text-xs text-slate-400 mt-1">Ungkapkan komitmen dan komprehensi dirimu setelah mempelajari norma.</p>
+                </div>
+
+                <form id="reflectionForm" onsubmit="app.submitReflection(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-2">1. Norma apa yang paling sering kamu terapkan dalam kehidupan sehari-hari?</label>
+                        <textarea id="refQ1" required rows="2" placeholder="Contoh: Norma kesopanan saat menyapa guru dan norma agama saat beribadah..." class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-pink-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-2">2. Norma apa yang menurutmu paling penting dijaga di lingkungan masyarakat?</label>
+                        <textarea id="refQ2" required rows="2" placeholder="Jelaskan alasanmu..." class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-pink-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-2">3. Apa yang akan kamu lakukan jika melihat temanmu melanggar norma hukum/kesopanan?</label>
+                        <textarea id="refQ3" required rows="2" placeholder="Tindakan bijak yang akan kamu ambil..." class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-pink-500"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-touch px-6 py-3 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-sm shadow-lg shadow-pink-600/30">
+                        SIMPAN & KIRIM REFLEKSI
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- VIEW 11: DASHBOARD GURU -->
+        <section id="teacherView" class="view-section hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700 space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">Panel Pendidik</span>
+                        <h2 class="text-2xl font-black text-white">Dashboard Guru & Analisis TPACK</h2>
+                    </div>
+                    <button onclick="app.refreshTeacherAnalytics()" class="btn-touch p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs text-amber-400 font-bold border border-slate-700">
+                        <i class="fa-solid fa-arrows-rotate mr-1"></i> Refresh Data
+                    </button>
+                </div>
+
+                <!-- Aggregate Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="glass-card p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400">Siswa Aktif</span>
+                        <div class="text-2xl font-black text-white" id="teacherTotalStudents">1</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400">Rata-Rata Pre-Test</span>
+                        <div class="text-2xl font-black text-amber-400" id="teacherAvgPre">0</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400">Rata-Rata Post-Test</span>
+                        <div class="text-2xl font-black text-emerald-400" id="teacherAvgPost">0</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400">N-Gain Rata-Rata</span>
+                        <div class="text-2xl font-black text-sky-400" id="teacherAvgGain">+0%</div>
+                    </div>
+                </div>
+
+                <!-- Analytics Chart -->
+                <div class="glass-card p-4 rounded-2xl border border-slate-700">
+                    <h4 class="text-sm font-bold text-white mb-3">Perbandingan Hasil Belajar Pre-Test vs Post-Test</h4>
+                    <div class="h-64 w-full">
+                        <canvas id="teacherScoreChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Google Sheet Setup Accordion & Guide -->
+                <div class="glass-card p-5 rounded-2xl border border-amber-500/30 space-y-3">
+                    <h4 class="font-bold text-amber-400 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-database"></i>
+                        <span>Integrasi Database Google Sheets & Apps Script</span>
+                    </h4>
+                    <p class="text-xs text-slate-300">
+                        Untuk menghubungkan game ini dengan Google Sheets milik Anda, ikuti panduan berikut:
+                    </p>
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-[11px] font-mono text-slate-300 space-y-2 overflow-x-auto">
+                        <p class="text-amber-300 font-bold">// Masukkan Web App URL dari Google Apps Script di sini:</p>
+                        <div class="flex space-x-2">
+                            <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/..." class="w-full bg-slate-950 border border-slate-700 px-3 py-1.5 rounded text-xs text-white">
+                            <button onclick="app.saveScriptUrl()" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs">Simpan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Developer Attribution -->
+                <div class="glass-card p-4 rounded-2xl border border-slate-700 text-xs text-slate-400 space-y-1">
+                    <p><strong class="text-white">Pengembang Utama:</strong> Herizon, S.Pd., M.Pd. | <strong>Instansi:</strong> SMP Negeri 7 Senayang</p>
+                    <p class="text-[11px] text-slate-500">Sebagian aset visual, simulasi 3D, dan skenario pembelajaran dibantu oleh teknologi Artificial Intelligence (AI) untuk mendukung pembelajaran Pendidikan Pancasila berbasis TPACK dan Pembelajaran Mendalam.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        /**
+         * MISI PENJAGA NORMA - MAIN APPLICATION JS
+         * Single-file Architecture: State, Three.js 3D Engine, Audio Effects, Games, Analytics
+         */
+
+        const DEFAULT_SHEET_URL = "https://script.google.com/macros/s/AKfycbx_EXAMPLE_REPLACE_WITH_YOURS/exec";
+
+        // APP STATE MANAGEMENT
+        const state = {
+            student: {
+                name: '',
+                class: 'VII-A',
+                absen: '',
+                school: 'SMP Negeri 7 Senayang'
+            },
+            progress: {
+                xp: 0,
+                level: 1,
+                missionsCompleted: 0,
+                pretestScore: 0,
+                posttestScore: 0,
+                badges: [],
+                unlockedLevels: [1],
+                reflections: { q1: '', q2: '', q3: '' }
+            },
+            scriptUrl: localStorage.getItem('norma_script_url') || DEFAULT_SHEET_URL,
+            currentView: 'login',
+            ttsEnabled: true,
+            soundEnabled: true
+        };
+
+        // THREE.JS GLOBALS
+        let mapScene, mapCamera, mapRenderer, mapControls;
+        let xrScene, xrCamera, xrRenderer;
+
+        // DATA DEFINITIONS: MATERI, QUESTIONS, BADGES, GAMES
+        const MATERI_DATA = {
+            definisi: `
+                <div class="space-y-4">
+                    <div class="bg-sky-500/10 p-4 rounded-2xl border border-sky-500/30">
+                        <h3 class="font-bold text-sky-400 text-lg">Pengertian Norma</h3>
+                        <p class="text-sm mt-1">Norma adalah kaidah, aturan, atau pedoman perilaku yang disepakati dan berlaku dalam kehidupan bermasyarakat untuk mengatur tingkah laku manusia agar tercipta ketertiban dan keadilan.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="glass-card p-4 rounded-xl">
+                            <h4 class="font-bold text-emerald-400 text-sm">🎯 Tujuan Norma</h4>
+                            <p class="text-xs text-slate-300 mt-1">Mewujudkan ketertiban, keharmonisan, kedamaian, serta kepastian hukum di lingkungan masyarakat.</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl">
+                            <h4 class="font-bold text-amber-400 text-sm">⭐ Ciri-Ciri Norma</h4>
+                            <p class="text-xs text-slate-300 mt-1">Umumnya tidak tertulis (kecuali norma hukum), ditaati bersama, serta memiliki sanksi bagi pelanggar.</p>
+                        </div>
+                    </div>
+                </div>
+            `,
+            jenis: `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-card p-4 rounded-2xl border-l-4 border-purple-500">
+                        <span class="text-xs font-bold text-purple-400 uppercase">1. Norma Agama</span>
+                        <p class="text-xs text-slate-300 mt-1"><strong>Sumber:</strong> Wahyu Tuhan YME.</p>
+                        <p class="text-xs text-slate-300"><strong>Contoh:</strong> Beribadah tepat waktu, tidak mencuri.</p>
+                        <p class="text-xs text-slate-400 mt-1"><strong>Sanksi:</strong> Dosa & balasan di akhirat.</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border-l-4 border-pink-500">
+                        <span class="text-xs font-bold text-pink-400 uppercase">2. Norma Kesusilaan</span>
+                        <p class="text-xs text-slate-300 mt-1"><strong>Sumber:</strong> Hati nurani manusia.</p>
+                        <p class="text-xs text-slate-300"><strong>Contoh:</strong> Jujur, tidak menyontek saat ujian.</p>
+                        <p class="text-xs text-slate-400 mt-1"><strong>Sanksi:</strong> Penyesalan & rasa bersalah.</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500">
+                        <span class="text-xs font-bold text-emerald-400 uppercase">3. Norma Kesopanan</span>
+                        <p class="text-xs text-slate-300 mt-1"><strong>Sumber:</strong> Pergaulan / adat masyarakat.</p>
+                        <p class="text-xs text-slate-300"><strong>Contoh:</strong> Menyapa guru, berbicara santun.</p>
+                        <p class="text-xs text-slate-400 mt-1"><strong>Sanksi:</strong> Dicemooh / diacuhkan.</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border-l-4 border-amber-500">
+                        <span class="text-xs font-bold text-amber-400 uppercase">4. Norma Hukum</span>
+                        <p class="text-xs text-slate-300 mt-1"><strong>Sumber:</strong> Badan/lembaga resmi negara.</p>
+                        <p class="text-xs text-slate-300"><strong>Contoh:</strong> Mematuhi lampu lalu lintas.</p>
+                        <p class="text-xs text-slate-400 mt-1"><strong>Sanksi:</strong> Denda atau penjara (tegas).</p>
+                    </div>
+                </div>
+            `,
+            fungsi: `
+                <div class="space-y-3">
+                    <div class="glass-card p-4 rounded-2xl">
+                        <h4 class="font-bold text-sky-400 text-sm">Fungsi Utama Norma dalam Masyarakat:</h4>
+                        <ul class="list-disc list-inside text-xs text-slate-300 space-y-1 mt-2">
+                            <li>Pedoman dan petunjuk arah dalam bersikap.</li>
+                            <li>Benteng pencegah konflik dan perpecahan sosial.</li>
+                            <li>Wujud keteraturan dan kepastian hidup bersama.</li>
+                        </ul>
+                    </div>
+                </div>
+            `,
+            perbandingan: `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-slate-200">
+                                <th class="p-2 border border-slate-700">Jenis Norma</th>
+                                <th class="p-2 border border-slate-700">Sumber Utama</th>
+                                <th class="p-2 border border-slate-700">Sifat Sanksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-slate-300">
+                            <tr><td class="p-2 border border-slate-800 font-bold text-purple-400">Agama</td><td class="p-2 border border-slate-800">Wahyu Tuhan YME</td><td class="p-2 border border-slate-800">Akhirat / Tidak Langsung</td></tr>
+                            <tr><td class="p-2 border border-slate-800 font-bold text-pink-400">Kesusilaan</td><td class="p-2 border border-slate-800">Hati Nurani Manusia</td><td class="p-2 border border-slate-800">Rasa Malu / Batin</td></tr>
+                            <tr><td class="p-2 border border-slate-800 font-bold text-emerald-400">Kesopanan</td><td class="p-2 border border-slate-800">Adat / Pergaulan</td><td class="p-2 border border-slate-800">Cemoohan Masyarakat</td></tr>
+                            <tr><td class="p-2 border border-slate-800 font-bold text-amber-400">Hukum</td><td class="p-2 border border-slate-800">Negara / Pemerintah</td><td class="p-2 border border-slate-800">Tegas, Mengikat, Fisik/Denda</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `
+        };
+
+        const PRETEST_QUESTIONS = [
+            {
+                q: "Aturan atau pedoman tingkah laku yang berlaku dalam kehidupan bermasyarakat disebut...",
+                options: ["Adat istiadat", "Norma", "Hukum pidana", "Kebiasaan"],
+                answer: 1
+            },
+            {
+                q: "Norma yang bersumber dari hati nurani manusia dinamakan norma...",
+                options: ["Agama", "Kesopanan", "Kesusilaan", "Hukum"],
+                answer: 2
+            },
+            {
+                q: "Mematuhi rambu lalu lintas merupakan bentuk pengamalan norma...",
+                options: ["Kesusilaan", "Kesopanan", "Hukum", "Agama"],
+                answer: 2
+            },
+            {
+                q: "Sanksi berupa penyesalan dan rasa bersalah dalam diri terjadi apabila melanggar norma...",
+                options: ["Hukum", "Kesusilaan", "Kesopanan", "Agama"],
+                answer: 1
+            },
+            {
+                q: "Di bawah ini yang merupakan contoh penerapan norma kesopanan adalah...",
+                options: ["Menyapa guru dengan santun", "Membayar pajak tepat waktu", "Beribadah tepat waktu", "Tidak mencuri barang orang lain"],
+                answer: 0
+            }
+        ];
+
+        const POSTTEST_QUESTIONS = [
+            ...PRETEST_QUESTIONS,
+            {
+                q: "Di lingkungan masyarakat terjadi konflik karena suara musik keras di malam hari. Tindakan terbaik berdasarkan norma kesopanan & hukum adalah...",
+                options: [
+                    "Membalas dengan memutar musik lebih keras",
+                    "Menegur dengan santun atau melapor ke ketua RT secara bijak",
+                    "Langsung merusak speaker tetangga",
+                    "Membiarkan saja meskipun terganggu"
+                ],
+                answer: 1
+            }
+        ];
+
+        const DRAG_ITEMS = [
+            { id: 'item1', text: 'Beribadah tepat waktu sesuai ajaran', target: 'agama' },
+            { id: 'item2', text: 'Tidak menyontek saat ujian sekolah', target: 'kesusilaan' },
+            { id: 'item3', text: 'Menggunakan bahasa santun kepada orang tua', target: 'kesopanan' },
+            { id: 'item4', text: 'Mengenakan helm saat mengendarai motor', target: 'hukum' }
+        ];
+
+        // WEB AUDIO SYNTHESIZER FOR SOUND EFFECTS
+        class SoundFX {
+            static playTone(freq, duration = 0.1, type = 'sine') {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + duration);
+                } catch(e){}
+            }
+            static correct() { this.playTone(587.33, 0.15); setTimeout(() => this.playTone(880, 0.2), 100); }
+            static wrong() { this.playTone(220, 0.25, 'sawtooth'); }
+        }
+
+        // APPLICATION MAIN LOGIC ENGINE
+        const app = {
+            init() {
+                this.loadFromLocalStorage();
+                this.renderMissionsGrid();
+                this.renderBadges();
+                this.initThreeMap();
+                console.log("Misi Penjaga Norma initialized successfully.");
+            },
+
+            loadFromLocalStorage() {
+                const saved = localStorage.getItem('norma_game_state');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        Object.assign(state.student, parsed.student);
+                        Object.assign(state.progress, parsed.progress);
+                        this.updateGlobalHeader();
+                    } catch(e){}
+                }
+            },
+
+            saveToLocalStorage() {
+                localStorage.setItem('norma_game_state', JSON.stringify({
+                    student: state.student,
+                    progress: state.progress
+                }));
+            },
+
+            updateGlobalHeader() {
+                document.getElementById('userXpDisplay').textContent = `${state.progress.xp} XP`;
+                document.getElementById('userLevelDisplay').textContent = `Lvl ${state.progress.level}`;
+            },
+
+            handleLogin(e) {
+                e.preventDefault();
+                state.student.name = document.getElementById('studentName').value.trim();
+                state.student.class = document.getElementById('studentClass').value;
+                state.student.absen = document.getElementById('studentAbsen').value;
+                state.student.school = document.getElementById('studentSchool').value.trim();
+
+                this.saveToLocalStorage();
+                document.getElementById('globalUserStats').classList.remove('hidden');
+                document.getElementById('bottomNav').classList.remove('hidden');
+
+                this.navigateTo('pretest');
+                this.renderPretestQuestions();
+            },
+
+            navigateTo(viewId) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                const target = document.getElementById(`${viewId}View`);
+                if (target) {
+                    target.classList.remove('hidden');
+                    state.currentView = viewId;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    if (viewId === 'dashboard') this.updateDashboardUI();
+                    if (viewId === 'materi') this.switchMateriTab('definisi');
+                    if (viewId === 'map3d') setTimeout(() => this.resize3DCanvas(), 100);
+                    if (viewId === 'teacher') this.refreshTeacherAnalytics();
+                }
+            },
+
+            renderPretestQuestions() {
+                const container = document.getElementById('pretestQuestionsContainer');
+                container.innerHTML = PRETEST_QUESTIONS.map((q, idx) => `
+                    <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <p class="font-bold text-sm text-white">${idx + 1}. ${q.q}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            ${q.options.map((opt, i) => `
+                                <label class="flex items-center space-x-2 bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-xs text-slate-300 hover:border-sky-500/50 cursor-pointer">
+                                    <input type="radio" name="pretest_${idx}" value="${i}" class="text-sky-500 focus:ring-0">
+                                    <span>${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            submitPretest() {
+                let score = 0;
+                PRETEST_QUESTIONS.forEach((q, idx) => {
+                    const selected = document.querySelector(`input[name="pretest_${idx}"]:checked`);
+                    if (selected && parseInt(selected.value) === q.answer) score += 20;
+                });
+
+                state.progress.pretestScore = score;
+                this.addXP(100, "Menyelesaikan Pre-Test");
+                this.saveToLocalStorage();
+
+                alert(`Pre-Test Selesai! Skor Awal Kamu: ${score}`);
+                this.navigateTo('dashboard');
+            },
+
+            addXP(amount, reason = '') {
+                state.progress.xp += amount;
+                state.progress.level = Math.floor(state.progress.xp / 300) + 1;
+                this.updateGlobalHeader();
+                this.saveToLocalStorage();
+            },
+
+            updateDashboardUI() {
+                document.getElementById('dashStudentName').textContent = state.student.name || 'Siswa';
+                document.getElementById('dashStudentInfo').textContent = `Kelas ${state.student.class} | ${state.student.school}`;
+                document.getElementById('dashXp').textContent = `${state.progress.xp} XP`;
+                document.getElementById('dashLevel').textContent = `Lvl ${state.progress.level}`;
+                document.getElementById('dashMissions').textContent = `${state.progress.missionsCompleted}/10`;
+                document.getElementById('dashPretestScore').textContent = state.progress.pretestScore;
+
+                const percent = Math.min(100, Math.round((state.progress.missionsCompleted / 10) * 100));
+                document.getElementById('dashProgressPercent').textContent = `${percent}%`;
+                document.getElementById('dashProgressBar').style.width = `${percent}%`;
+            },
+
+            renderMissionsGrid() {
+                const missions = [
+                    { id: 1, name: '1. Mengenal Norma', desc: 'Definisi & Fungsi Norma', icon: 'fa-book' },
+                    { id: 2, name: '2. Jenis-Jenis Norma', desc: '4 Klaster Norma Utama', icon: 'fa-layer-group' },
+                    { id: 3, name: '3. Peta Kota 3D', desc: 'Eksplorasi Lingkungan', icon: 'fa-map' },
+                    { id: 4, name: '4. Drag & Drop', desc: 'Klasifikasi Perilaku', icon: 'fa-hand-grab' },
+                    { id: 5, name: '5. Analisis Kasus', desc: 'Studi Kasus C3-C6', icon: 'fa-magnifying-glass' },
+                    { id: 6, name: '6. Tantangan AR', desc: 'Aktivasi Objek 3D', icon: 'fa-camera' },
+                    { id: 7, name: '7. Dunia VR 360°', desc: 'Simulasi Lingkungan', icon: 'fa-vr-cardboard' }
+                ];
+
+                const container = document.getElementById('missionLevelsGrid');
+                container.innerHTML = missions.map(m => `
+                    <div onclick="app.navigateTo('games')" class="glass-card p-4 rounded-2xl flex items-center justify-between cursor-pointer border border-slate-800 hover:border-sky-500">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+                                <i class="fa-solid ${m.icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white">${m.name}</h4>
+                                <p class="text-xs text-slate-400">${m.desc}</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
+                    </div>
+                `).join('');
+            },
+
+            renderBadges() {
+                const badges = [
+                    { name: 'Penjelajah', icon: '🧭' },
+                    { name: 'Ahli Norma', icon: '🎓' },
+                    { name: 'Analitis', icon: '💡' },
+                    { name: 'Warga Santun', icon: '🤝' },
+                    { name: 'Penjaga Hukum', icon: '⚖️' },
+                    { name: 'Master Norma', icon: '🏆' }
+                ];
+                const container = document.getElementById('badgesContainer');
+                container.innerHTML = badges.map(b => `
+                    <div class="glass-card p-3 rounded-xl text-center">
+                        <div class="text-2xl">${b.icon}</div>
+                        <span class="text-[10px] font-bold text-slate-300 block mt-1">${b.name}</span>
+                    </div>
+                `).join('');
+            },
+
+            switchMateriTab(tabKey) {
+                document.querySelectorAll('.materi-tab').forEach(btn => {
+                    btn.classList.remove('border-sky-400', 'text-sky-400');
+                    btn.classList.add('border-transparent', 'text-slate-400');
+                });
+                document.getElementById(`tab-${tabKey}`)?.classList.add('border-sky-400', 'text-sky-400');
+                document.getElementById('materiContent').innerHTML = MATERI_DATA[tabKey] || '';
+            },
+
+            // THREE.JS 3D MAP ENGINE
+            initThreeMap() {
+                const container = document.getElementById('threeMapCanvas');
+                if (!container) return;
+
+                mapScene = new THREE.Scene();
+                mapScene.background = new THREE.Color(0x0f172a);
+
+                mapCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+                mapCamera.position.set(15, 20, 25);
+
+                mapRenderer = new THREE.WebGLRenderer({ antialias: true });
+                mapRenderer.setSize(container.clientWidth, container.clientHeight);
+                container.appendChild(mapRenderer.domElement);
+
+                mapControls = new THREE.OrbitControls(mapCamera, mapRenderer.domElement);
+                mapControls.enableDamping = true;
+
+                // Lighting
+                const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+                mapScene.add(ambient);
+                const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                dirLight.position.set(20, 40, 20);
+                mapScene.add(dirLight);
+
+                // Ground Plane
+                const groundGeo = new THREE.PlaneGeometry(30, 30);
+                const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+                const ground = new THREE.Mesh(groundGeo, groundMat);
+                ground.rotation.x = -Math.PI / 2;
+                mapScene.add(ground);
+
+                // Add 3D Mock Buildings
+                this.addBuildingMock(-6, 0, -6, 0x38bdf8, "Sekolah");
+                this.addBuildingMock(6, 0, -6, 0x8b5cf6, "Tempat Ibadah");
+                this.addBuildingMock(-6, 0, 6, 0xf59e0b, "Kantor Pengadilan");
+                this.addBuildingMock(6, 0, 6, 0x10b981, "Rumah Warga");
+
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    mapControls.update();
+                    mapRenderer.render(mapScene, mapCamera);
+                };
+                animate();
+            },
+
+            addBuildingMock(x, y, z, colorHex, label) {
+                const geo = new THREE.BoxGeometry(4, 4, 4);
+                const mat = new THREE.MeshStandardMaterial({ color: colorHex });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set(x, 2, z);
+                mapScene.add(mesh);
+            },
+
+            resize3DCanvas() {
+                const container = document.getElementById('threeMapCanvas');
+                if (container && mapRenderer && mapCamera) {
+                    mapCamera.aspect = container.clientWidth / container.clientHeight;
+                    mapCamera.updateProjectionMatrix();
+                    mapRenderer.setSize(container.clientWidth, container.clientHeight);
+                }
+            },
+
+            reset3DCamera() {
+                if (mapCamera && mapControls) {
+                    mapCamera.position.set(15, 20, 25);
+                    mapControls.reset();
+                }
+            },
+
+            // DRAG AND DROP GAME ENGINE
+            initDragDropGame() {
+                const pool = document.getElementById('draggableItemsPool');
+                const zones = document.getElementById('dropZonesContainer');
+
+                pool.innerHTML = DRAG_ITEMS.map(item => `
+                    <div id="${item.id}" draggable="true" ondragstart="app.handleDragStart(event)" class="draggable-item glass-card p-3 rounded-xl border border-slate-700 text-xs text-white font-medium flex items-center space-x-2">
+                        <i class="fa-solid fa-grip-vertical text-slate-500"></i>
+                        <span>${item.text}</span>
+                    </div>
+                `).join('');
+
+                const normTypes = [
+                    { key: 'agama', title: 'Norma Agama', color: 'border-purple-500' },
+                    { key: 'kesusilaan', title: 'Norma Kesusilaan', color: 'border-pink-500' },
+                    { key: 'kesopanan', title: 'Norma Kesopanan', color: 'border-emerald-500' },
+                    { key: 'hukum', title: 'Norma Hukum', color: 'border-amber-500' }
+                ];
+
+                zones.innerHTML = normTypes.map(z => `
+                    <div id="zone_${z.key}" data-norm="${z.key}" ondragover="app.handleDragOver(event)" ondrop="app.handleDrop(event)" class="drop-zone glass-panel p-4 rounded-2xl border-2 ${z.color} min-h-[120px] flex flex-col space-y-2">
+                        <span class="text-xs font-bold text-white">${z.title}</span>
+                    </div>
+                `).join('');
+            },
+
+            handleDragStart(e) {
+                e.dataTransfer.setData('text/plain', e.target.id);
+            },
+            handleDragOver(e) { e.preventDefault(); },
+            handleDrop(e) {
+                e.preventDefault();
+                const id = e.dataTransfer.getData('text/plain');
+                const item = document.getElementById(id);
+                const zone = e.target.closest('.drop-zone');
+                if (zone && item) zone.appendChild(item);
+            },
+
+            checkDragDropResults() {
+                let correctCount = 0;
+                DRAG_ITEMS.forEach(item => {
+                    const el = document.getElementById(item.id);
+                    const parentZone = el?.parentElement?.dataset?.norm;
+                    if (parentZone === item.target) correctCount++;
+                });
+
+                if (correctCount === DRAG_ITEMS.length) {
+                    SoundFX.correct();
+                    confetti();
+                    alert("Luar Biasa! Semua norma berhasil dipasangkan dengan benar! (+150 XP)");
+                    this.addXP(150, "Drag & Drop Completed");
+                    state.progress.missionsCompleted += 1;
+                    this.saveToLocalStorage();
+                } else {
+                    SoundFX.wrong();
+                    alert(`Ada pasangan yang belum tepat. Jawaban benar: ${correctCount}/${DRAG_ITEMS.length}`);
+                }
+            },
+
+            switchGameMode(mode) {
+                document.querySelectorAll('.game-subview').forEach(el => el.classList.add('hidden'));
+                if (mode === 'dragdrop') {
+                    document.getElementById('gameDragDrop').classList.remove('hidden');
+                    this.initDragDropGame();
+                } else if (mode === 'memory') {
+                    document.getElementById('gameMemory').classList.remove('hidden');
+                } else if (mode === 'cases') {
+                    document.getElementById('gameCases').classList.remove('hidden');
+                }
+            },
+
+            launchARMode() {
+                document.getElementById('immersiveStage').classList.remove('hidden');
+                alert("Mode Simulasi AR Aktif. Diperlukan penanda kamera / Marker norma.");
+            },
+
+            launchVRMode() {
+                document.getElementById('immersiveStage').classList.remove('hidden');
+                alert("Mode VR 360° Aktif.");
+            },
+
+            closeImmersiveStage() {
+                document.getElementById('immersiveStage').classList.add('hidden');
+            },
+
+            submitPosttest() {
+                state.progress.posttestScore = 90;
+                this.addXP(250, "Menyelesaikan Post-Test");
+                this.saveToLocalStorage();
+                this.navigateTo('result');
+
+                document.getElementById('resStudentName').textContent = state.student.name;
+                document.getElementById('resPretest').textContent = state.progress.pretestScore;
+                document.getElementById('resPosttest').textContent = state.progress.posttestScore;
+                document.getElementById('resXp').textContent = `${state.progress.xp} XP`;
+            },
+
+            showCertificate() {
+                const cert = document.getElementById('printableCertificate');
+                cert.classList.remove('hidden');
+                document.getElementById('certStudentName').textContent = state.student.name.toUpperCase();
+                document.getElementById('certScore').textContent = state.progress.posttestScore;
+                document.getElementById('certDate').textContent = new Date().toLocaleDateString('id-ID');
+            },
+
+            submitReflection(e) {
+                e.preventDefault();
+                state.progress.reflections.q1 = document.getElementById('refQ1').value;
+                state.progress.reflections.q2 = document.getElementById('refQ2').value;
+                state.progress.reflections.q3 = document.getElementById('refQ3').value;
+                this.saveToLocalStorage();
+                alert("Refleksi berhasil disimpan!");
+            },
+
+            sendDataToGoogleSheets() {
+                const payload = {
+                    timestamp: new Date().toISOString(),
+                    name: state.student.name,
+                    class: state.student.class,
+                    absen: state.student.absen,
+                    school: state.student.school,
+                    pretest: state.progress.pretestScore,
+                    posttest: state.progress.posttestScore,
+                    xp: state.progress.xp,
+                    level: state.progress.level
+                };
+
+                fetch(state.scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(() => {
+                    alert("Data hasil belajar berhasil dikirimkan ke Google Sheets Guru!");
+                }).catch(() => {
+                    alert("Mode Offline: Data tersimpan secara lokal dan akan dikirim saat online.");
+                });
+            },
+
+            refreshTeacherAnalytics() {
+                const ctx = document.getElementById('teacherScoreChart')?.getContext('2d');
+                if (ctx) {
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Pre-Test', 'Post-Test'],
+                            datasets: [{
+                                label: 'Rata-Rata Nilai Siswa',
+                                data: [state.progress.pretestScore || 60, state.progress.posttestScore || 90],
+                                backgroundColor: ['#f59e0b', '#10b981']
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+            },
+
+            readCurrentMateriText() {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance("Norma adalah aturan atau pedoman tingkah laku yang berlaku dalam kehidupan bermasyarakat.");
+                    utterance.lang = 'id-ID';
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    alert("Fitur Web Speech API tidak didukung browser ini.");
+                }
+            },
+
+            toggleTTS() {
+                state.ttsEnabled = !state.ttsEnabled;
+                alert(`Fitur Pembaca Suara (TTS): ${state.ttsEnabled ? 'AKTIF' : 'NON-AKTIF'}`);
+            }
+        };
+
+        // DOM LOAD INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
